@@ -1,4 +1,6 @@
-# AI Debugger - aidbg `A minimal, event-driven AI debugging engine for Python.`
+# AI Debugger - aidbg
+
+`A minimal, event-driven AI debugging engine for Python.`
 
 ![PyPI](https://img.shields.io/pypi/v/aidbg)
 ![Python](https://img.shields.io/pypi/pyversions/aidbg)
@@ -143,7 +145,10 @@ Python raises ZeroDivisionError when the divisor is zero.
 ----
 
 ## 📸 Example
+**init**
 ![aidbg demo](docs/init.png)
+
+**run**
 ![aidbg demo](docs/run.png)
 
 ---
