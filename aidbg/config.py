@@ -1,8 +1,9 @@
 
 import json
 from pathlib import Path
+from typing import Optional
 
-def load_config(project_root: Path | None = None):
+def load_config(project_root: Optional[Path] = None):
     paths = []
 
     if project_root:
