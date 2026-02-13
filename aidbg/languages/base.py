@@ -1,6 +1,7 @@
 # aidbg/languages/base.py
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Optional, Tuple
 
 
 class LanguageAdapter(ABC):
@@ -9,7 +10,8 @@ class LanguageAdapter(ABC):
         pass
 
     @abstractmethod
-    def extract_location(self, output: str) -> tuple[str | None, int | None]:
+    def extract_location(self, output: str) -> Tuple[Optional[str], Optional[int]]:
+
         pass
 
     @abstractmethod
