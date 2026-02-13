@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-from aidbg.context.collector import extract_error_location, get_code_snippet
 from aidbg.context.project_tree import get_project_tree
 from aidbg.context.environment import get_environment_info
 from aidbg.context.dependencies import get_dependencies
@@ -14,33 +13,31 @@ from aidbg.llm.groq import GroqClient
 from aidbg.llm.openai import OpenAIClient
 from aidbg.llm.ollama import OllamaClient
 
-from aidbg.logic.complexity import classify_error
 from aidbg.logic.token_budget import get_token_budget
 
 
-def detect_crash(output: str, project_root: Path):
-    if "Traceback (most recent call last)" not in output:
-        print("✖ Program failed (no traceback found)")
+def handle_crash(output: str, project_root: Path, adapter):
+    if not adapter.detect_crash(output):
+        print("✖ Program failed (no recognizable crash)")
         return
 
     print("✖ Crash detected\n")
-
-    print("--- Traceback ---")
+    print("--- Traceback / Error ---")
     print(output.strip())
 
-    file_path, line_no = extract_error_location(output)
+    file_path, line_no = adapter.extract_location(output)
 
     snippet = ""
     if file_path and line_no:
         print("\n--- Code Snippet ---")
-        snippet = get_code_snippet(file_path, line_no)
+        snippet = adapter.get_snippet(file_path, line_no)
         print(snippet)
 
     tree = get_project_tree(project_root)
     env = get_environment_info()
     deps = get_dependencies(project_root)
 
-    level = classify_error(output)
+    level = adapter.classify_error(output)
     token_budget = get_token_budget(level)
 
     try:
@@ -50,29 +47,30 @@ def detect_crash(output: str, project_root: Path):
         if provider == "groq":
             client = GroqClient(
                 api_key=cfg["api_key"],
-                model=cfg.get("model", "llama-3.1-8b-instant"),
+                model=cfg.get("model"),
             )
 
         elif provider == "openai":
             client = OpenAIClient(
                 api_key=cfg["api_key"],
-                model=cfg.get("model", "gpt-4o-mini"),
+                model=cfg.get("model"),
             )
 
         elif provider == "ollama":
             client = OllamaClient(
-                model=cfg.get("model", "llama3"),
+                model=cfg.get("model"),
             )
 
         else:
             raise RuntimeError(f"Unsupported LLM provider: {provider}")
 
         user_prompt = build_user_prompt(
-            output,
-            snippet,
-            tree,
-            env,
-            deps,
+            language=adapter.__class__.__name__.replace("Adapter", ""),
+            traceback=output,
+            snippet=snippet,
+            tree=tree,
+            env=env,
+            deps=deps,
         )
 
         response = client.complete(

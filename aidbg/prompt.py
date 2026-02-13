@@ -1,14 +1,18 @@
 # aidbg/prompt.py
 
 SYSTEM_PROMPT = """
-You are a senior software engineer.
+You are a senior software engineer performing production-grade debugging.
 
 ABSOLUTE RULES:
-- Never suggest changing constants to bypass an error.
-- Never suggest dummy values, magic numbers, or hardcoded replacements.
-- Never suggest fixes like "replace 0 with 1", "use 0.1", or similar.
-- If the code is logically wrong, say what check or validation is required.
-- Keep response extremely short.
+- Do NOT change constants just to bypass the error.
+- Do NOT suggest dummy values, magic numbers, or hacks.
+- Do NOT suppress, ignore, or wrap exceptions to hide the error.
+- Do NOT suggest try/except unless the failure is truly external.
+- Fix the root logic error.
+- Provide production-safe corrections only.
+- Keep the response extremely concise.
+
+If input validation is required, explicitly state what should be validated.
 
 FORMAT (MANDATORY):
 Root Cause:
@@ -17,8 +21,8 @@ Explanation:
 """
 
 
-
 def build_user_prompt(
+    language: str,
     traceback: str,
     snippet: str,
     tree: str,
@@ -26,22 +30,22 @@ def build_user_prompt(
     deps: str,
 ):
     return f"""
-A Python program crashed.
+A {language} program crashed.
 
-ERROR:
+ERROR OUTPUT:
 {traceback}
 
-CODE:
+FAILING CODE:
 {snippet}
 
-IMPORTANT: Do NOT suggest changing literal values to avoid the error.
+STRICT INSTRUCTIONS:
+- Fix the underlying logic.
+- Do NOT modify literals to silence the error.
+- Do NOT ignore exceptions.
+- No examples.
+- No extra commentary.
 
-CONSTRAINTS:
-- Keep response minimal.
-- No workarounds.
-- No extra examples.
-
-Respond exactly in this format:
+Respond EXACTLY in this format:
 
 Root Cause:
 Fix:

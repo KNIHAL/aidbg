@@ -1,6 +1,6 @@
 [project]
 name = "aidbg"
-version = "0.1.2"
+version = "0.1.3"
 description = "Local-first CLI AI debugger for Python projects"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -61,3 +61,7 @@ addopts = "-q"
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["aidbg*"]
+exclude = ["tests*", "examples*", "docs*"]
