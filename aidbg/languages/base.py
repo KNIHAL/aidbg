@@ -11,7 +11,6 @@ class LanguageAdapter(ABC):
 
     @abstractmethod
     def extract_location(self, output: str) -> Tuple[Optional[str], Optional[int]]:
-
         pass
 
     @abstractmethod
